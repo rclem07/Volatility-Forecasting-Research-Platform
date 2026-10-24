@@ -16,7 +16,7 @@ forecastable. Strong simple baselines also make it a good test of whether a
 complex model adds real value.
 
 ## Planned scope
-- [ ] Ingest 15+ years of daily prices for ~10 assets into PostgreSQL
+- [x] Ingest 15+ years of daily prices for ~10 assets into PostgreSQL
 - [ ] Build features (realized volatility, VIX, volume) with pandas and NumPy
 - [ ] Baselines: naive, HAR, and GARCH
 - [ ] Neural models in PyTorch: MLP and LSTM
