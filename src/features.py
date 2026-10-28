@@ -1,9 +1,11 @@
 
 import os
 
+import numpy as np
 import pandas as pd
 import pandas_market_calendars as mcal
 import psycopg2
+from pathlib import Path
 
 
 # 1. Connect to PostgreSQL
@@ -131,3 +133,75 @@ for ticker, group in df.groupby("ticker"):
             f"{row['daily_return']:+.2f}%"
         )
 
+
+# 11. Calculate log returns and realized volatility
+print("\nCalculating returns and volatility:")
+
+featureData = []
+
+for ticker, group in df.groupby("ticker"):
+    tickerData = group.sort_values("date").copy()
+
+    # Convert database prices into numeric values
+    tickerData["adj_close"] = pd.to_numeric(
+        tickerData["adj_close"]
+    )
+
+    # Calculate daily logarithmic returns
+    tickerData["log_return"] = np.log(
+        tickerData["adj_close"] /
+        tickerData["adj_close"].shift(1)
+    )
+
+    # Square each daily log return
+    squared_returns = tickerData["log_return"] ** 2
+
+    # Calculate historical realized volatility
+    tickerData["vol_1d"] = np.sqrt(squared_returns)
+
+    tickerData["vol_5d"] = np.sqrt(
+        squared_returns.rolling(window=5).mean()
+    )
+
+    tickerData["vol_22d"] = np.sqrt(
+        squared_returns.rolling(window=22).mean()
+    )
+
+    # Calculate volatility over the NEXT 5 trading days
+    tickerData["target_vol_next_5d"] = (
+        tickerData["vol_5d"].shift(-5)
+    )
+
+    featureData.append(tickerData)
+
+# Combine all ticker DataFrames
+features = pd.concat(featureData, ignore_index=True)
+
+# Display the first 10 rows for SPY
+spy = features[features["ticker"] == "SPY"]
+
+print(
+    spy[
+        [
+            "date",
+            "adj_close",
+            "log_return",
+            "vol_1d",
+            "vol_5d",
+            "vol_22d",
+            "target_vol_next_5d"
+        ]
+    ].head(30).to_string(index=False)
+)
+
+# 12. Export calculated features to CSV
+
+outputFolder = Path("data")
+outputFolder.mkdir(exist_ok=True)
+
+features.to_csv(
+    outputFolder / "historical_features.csv",
+    index=False
+)
+
+print("Features successfully exported to CSV.")
