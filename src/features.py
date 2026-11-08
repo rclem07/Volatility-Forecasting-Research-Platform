@@ -194,7 +194,60 @@ print(
     ].head(30).to_string(index=False)
 )
 
-# 12. Export calculated features to CSV
+# 12. Add VIX and trading volume features
+print("\nAdding VIX and trading volume features:")
+
+# Get the VIX closing price for each date
+vixData = features[
+    features["ticker"] == "^VIX"
+][["date", "close"]].copy()
+
+# Rename the VIX closing price column
+vixData = vixData.rename(
+    columns={"close": "vix_level"}
+)
+
+# Match VIX levels to other assets using their dates
+features = features.merge(
+    vixData,
+    on="date",
+    how="left",
+    validate="many_to_one"
+)
+
+# Convert volume to numeric values
+features["volume"] = pd.to_numeric(
+    features["volume"],
+    errors="coerce"
+)
+
+# Calculate daily volume changes separately for each ticker
+features["volume_change"] = (
+    features.groupby("ticker")["volume"]
+    .pct_change(fill_method=None)
+)
+
+# VIX is an index, not a stock with ordinary share volume
+features.loc[
+    features["ticker"] == "^VIX",
+    "volume_change"
+] = np.nan
+
+# Avoid infinite values caused by zero previous-day volume
+features["volume_change"] = features[
+    "volume_change"
+].replace([np.inf, -np.inf], np.nan)
+
+# Display sample results
+print(
+    features[
+        features["ticker"] == "SPY"
+    ][
+        ["date", "ticker", "volume_change", "vix_level"]
+    ].head(10).to_string(index=False)
+)
+
+# 13. Export calculated features to CSV
 
 outputFolder = Path("data")
 outputFolder.mkdir(exist_ok=True)
