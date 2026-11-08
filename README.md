@@ -17,7 +17,7 @@ complex model adds real value.
 
 ## Planned scope
 - [x] Ingest 15+ years of daily prices for ~10 assets into PostgreSQL
-- [ ] Build features (realized volatility, VIX, volume) with pandas and NumPy
+- [x] Build features (realized volatility, VIX, volume) with pandas and NumPy
 - [ ] Baselines: naive, HAR, and GARCH
 - [ ] Neural models in PyTorch: MLP and LSTM
 - [ ] Walk-forward validation with a data leakage check
@@ -28,6 +28,12 @@ complex model adds real value.
 ## Tech stack (planned)
 Python, pandas, NumPy, PyTorch, scikit-learn, arch, PostgreSQL, Docker,
 AWS (S3, DynamoDB)
+
+## Volatility Visualization
+
+The chart below shows SPY's 22-day annualized realized volatility from 2010 onward. It highlights volatility clustering and major periods of market stress, particularly the COVID-19 market crash in March 2020.
+
+![SPY 22-Day Annualized Realized Volatility](charts/spy_volatility.png)
 
 ## Results
 N/A
