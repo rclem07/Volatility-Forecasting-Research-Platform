@@ -7,7 +7,11 @@ import pandas as pd
 import pandas_market_calendars as mcal
 import psycopg2
 from pathlib import Path
-
+from calculations import (
+    calculate_log_returns,
+    calculate_volatility,
+    calculate_future_volatility
+)
 
 # 1. Connect to PostgreSQL
 conn = psycopg2.connect(
@@ -149,28 +153,26 @@ for ticker, group in df.groupby("ticker"):
     )
 
     # Calculate daily logarithmic returns
-    tickerData["log_return"] = np.log(
-        tickerData["adj_close"] /
-        tickerData["adj_close"].shift(1)
+    tickerData["log_return"] = calculate_log_returns(
+        tickerData["adj_close"]
     )
-
-    # Square each daily log return
-    squared_returns = tickerData["log_return"] ** 2
 
     # Calculate historical realized volatility
-    tickerData["vol_1d"] = np.sqrt(squared_returns)
-
-    tickerData["vol_5d"] = np.sqrt(
-        squared_returns.rolling(window=5).mean()
+    tickerData["vol_1d"] = calculate_volatility(
+        tickerData["log_return"], 1
     )
 
-    tickerData["vol_22d"] = np.sqrt(
-        squared_returns.rolling(window=22).mean()
+    tickerData["vol_5d"] = calculate_volatility(
+        tickerData["log_return"], 5
+    )
+
+    tickerData["vol_22d"] = calculate_volatility(
+        tickerData["log_return"], 22
     )
 
     # Calculate volatility over the NEXT 5 trading days
-    tickerData["target_vol_next_5d"] = (
-        tickerData["vol_5d"].shift(-5)
+    tickerData["target_vol_next_5d"] = calculate_future_volatility(
+        tickerData["log_return"], 5
     )
 
     featureData.append(tickerData)
@@ -178,7 +180,7 @@ for ticker, group in df.groupby("ticker"):
 # Combine all ticker DataFrames
 features = pd.concat(featureData, ignore_index=True)
 
-# Display the first 10 rows for SPY
+# Display the first 30 rows for SPY
 spy = features[features["ticker"] == "SPY"]
 
 print(
