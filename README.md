@@ -18,7 +18,7 @@ complex model adds real value.
 ## Planned scope
 - [x] Ingest 15+ years of daily prices for ~10 assets into PostgreSQL
 - [x] Build features (realized volatility, VIX, volume) with pandas and NumPy
-- [ ] Baselines: naive, HAR, and GARCH
+- [x] Baselines: naive, HAR, and GARCH
 - [ ] Neural models in PyTorch: MLP and LSTM
 - [ ] Walk-forward validation with a data leakage check
 - [ ] Backtest a volatility-targeting strategy vs. buy-and-hold
