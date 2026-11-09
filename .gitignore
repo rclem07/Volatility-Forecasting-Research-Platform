@@ -219,5 +219,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Generated financial data
-data/*.csv
+# Generated financial datasets
+data/**/*.csv

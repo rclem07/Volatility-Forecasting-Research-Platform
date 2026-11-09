@@ -262,7 +262,26 @@ features.to_csv(
 
 print("Features successfully exported to CSV.")
 
-# 14. Plot SPY's historical realized volatility
+# 14. Export individual CSV files for each ticker
+
+tickerFolder = Path("data/by_ticker")
+tickerFolder.mkdir(parents=True, exist_ok=True)
+
+for ticker, group in features.groupby("ticker"):
+    tickerData = group.sort_values("date").copy()
+
+    # Remove special characters from ticker names
+    fileName = ticker.replace("^", "")
+
+    tickerData.to_csv(
+        tickerFolder / f"{fileName}.csv",
+        index=False
+    )
+
+    print(f"Exported {ticker} data to {fileName}.csv")
+
+
+# 15. Plot SPY's historical realized volatility
 print("\nCreating SPY volatility chart:")
 
 # Select SPY observations
@@ -308,3 +327,31 @@ plt.savefig(
 plt.show()
 
 print("SPY volatility chart successfully saved.")
+
+# 16. Verify the final feature DataFrames
+print("\nVerifying feature data for each ticker:")
+
+for ticker, group in features.groupby("ticker"):
+    tickerData = group.sort_values("date").copy()
+
+    # Check for duplicate dates
+    duplicates = tickerData["date"].duplicated().sum()
+
+    # Check missing values in the calculated features
+    feature_columns = [
+        "log_return",
+        "vol_1d",
+        "vol_5d",
+        "vol_22d",
+        "target_vol_next_5d",
+        "vix_level",
+        "volume_change"
+    ]
+
+    missing = tickerData[feature_columns].isna().sum()
+
+    print(f"\nTicker: {ticker}")
+    print(f"Total rows: {len(tickerData)}")
+    print(f"Duplicate dates: {duplicates}")
+    print("Missing feature values:")
+    print(missing.to_string())
