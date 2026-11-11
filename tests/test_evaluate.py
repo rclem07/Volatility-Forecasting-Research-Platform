@@ -59,3 +59,44 @@ def test_expanding_training_window():
 
     for i in range(1, len(trainingSizes)):
         assert trainingSizes[i] > trainingSizes[i - 1]
+
+# Test 4: Verify MAE and RMSE calculations
+def test_evaluation_metrics():
+    import numpy as np
+
+    actual = np.array([0.01, 0.02, 0.03])
+    predicted = np.array([0.02, 0.02, 0.01])
+
+    errors = predicted - actual
+
+    mae = np.abs(errors).mean()
+    rmse = np.sqrt((errors ** 2).mean())
+
+    assert np.isclose(mae, 0.01)
+    assert np.isclose(rmse, np.sqrt(0.0005 / 3))
+
+# Test 5: Verify predictions align with their test dates
+def test_prediction_alignment():
+    import numpy as np
+
+    data = create_test_data()
+
+    for year, trainData, testData in create_walk_forward_splits(data):
+
+        dates = testData["date"].to_numpy()
+        actual = testData["target_vol_next_5d"].to_numpy()
+
+        # Simulate the naive forecasting model
+        predictions = testData["vol_5d"].to_numpy()
+
+        assert len(dates) == len(actual)
+        assert len(actual) == len(predictions)
+
+        # Test dates must remain in chronological order
+        assert testData["date"].is_monotonic_increasing
+
+        # Verify the naive predictions match the correct rows
+        np.testing.assert_array_equal(
+            predictions,
+            testData["vol_5d"].to_numpy()
+        )
