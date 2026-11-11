@@ -19,11 +19,11 @@ complex model adds real value.
 - [x] Ingest 15+ years of daily prices for ~10 assets into PostgreSQL
 - [x] Build features (realized volatility, VIX, volume) with pandas and NumPy
 - [x] Baselines: naive, HAR, and GARCH
+- [x] Walk-forward validation with a data leakage check
+- [x] Unit tests for feature and evaluation logic
 - [ ] Neural models in PyTorch: MLP and LSTM
-- [ ] Walk-forward validation with a data leakage check
 - [ ] Backtest a volatility-targeting strategy vs. buy-and-hold
 - [ ] Log experiments to DynamoDB and store raw data in AWS S3
-- [ ] Unit tests for feature and evaluation logic
 
 ## Tech stack (planned)
 Python, pandas, NumPy, PyTorch, scikit-learn, arch, PostgreSQL, Docker,
